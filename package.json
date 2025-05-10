@@ -1,0 +1,10 @@
+{
+  "name": "internationalized-date-bikram-samvat-patch",
+  "version": "1.0.0",
+  "description": "",
+  "packageManager": "pnpm@10.10.0",
+  "devDependencies": {
+    "@types/node": "^22.15.17",
+    "tsx": "^4.19.4"
+  }
+}
