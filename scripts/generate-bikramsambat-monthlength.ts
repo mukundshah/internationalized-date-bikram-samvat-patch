@@ -214,8 +214,8 @@ function generateBikramArray() {
     output += `\n  //* ${groupYears[0]} -${groupYears[groupYears.length - 1]} */\n`;
 
     // Process each year in the group
-    const binaryStrings = [];
-    const hexValues = [];
+    const binaryStrings = [] as string[];
+    const hexValues = [] as string[];
 
     for (const year of groupYears) {
       const monthLengths = yearMonthData[year];
@@ -244,7 +244,7 @@ async function main() {
 
   const output = generateBikramArray();
 
-  const outputFile = path.join(__dirname, 'generate-bikramsambat.js');
+  const outputFile = path.join(__dirname, 'generate-bikramsambat.ts');
 
   writeFileSync(outputFile, output);
 }
