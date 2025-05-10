@@ -1,0 +1,13 @@
+{
+  "package": "@internationalized/date",
+  "upstreamVersion": "3.8.0",
+  "patchVersion": "1.0.0",
+  "features": [
+    "nepali-calendar-support"
+  ],
+  "appliesTo": [
+    "original build output",
+    "source"
+  ],
+  "notes": "Adds support for Bikram Sambat (Nepali calendar)"
+}
