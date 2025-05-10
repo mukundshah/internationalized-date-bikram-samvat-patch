@@ -11,6 +11,11 @@ for cmd in jq rsync yarn pnpm; do
     fi
 done
 
+# Get version from patch.json
+package_version=$(jq -r '.upstreamVersion' patch.json)
+patch_version=$(jq -r '.patchVersion' patch.json)
+project_dir=$(pwd)
+
 # Create temp directory
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT
@@ -22,11 +27,8 @@ cp -r modified-files "$TEMP_DIR/"
 # Change to temp directory
 cd "$TEMP_DIR"
 
-# Get version from patch.json
-patch_version=$(jq -r '.upstreamVersion' patch.json)
-
 # Clone and setup react-spectrum
-git clone --depth 1 --branch "@internationalized/date@$patch_version" https://github.com/adobe/react-spectrum.git
+git clone --depth 1 --branch "@internationalized/date@$package_version" https://github.com/adobe/react-spectrum.git
 cd react-spectrum
 rm -rf .nvmrc
 
@@ -52,7 +54,7 @@ cd ..
 mkdir patched-packages
 cd patched-packages
 pnpm init
-pnpm install "@internationalized/date@$patch_version"
+pnpm install "@internationalized/date@$package_version"
 
 mkdir -p @internationalized/date
 pnpm patch @internationalized/date --edit-dir @internationalized/date
@@ -64,8 +66,8 @@ rsync -av ../react-spectrum/packages/@internationalized/date/src/ @international
 # Create and copy patch
 pnpm patch-commit "$(pwd)/@internationalized/date"
 
-PATCH_FILE="@internationalized_date_${patch_version}.patch"
-mkdir -p "$OLDPWD/patches"
-cp patches/@internationalized__date.patch "$OLDPWD/patches/$PATCH_FILE"
+PATCH_FILE="@internationalized__date@${package_version}__${patch_version}.patch"
+mkdir -p "$project_dir/patches"
+cp patches/@internationalized__date.patch "$project_dir/patches/$PATCH_FILE"
 
 echo "Patch file created at patches/$PATCH_FILE"
