@@ -152,31 +152,17 @@ function encodeMonthLengths(monthLengths) {
 
   // For Nepali calendar, we need to encode each month using 2 bits
   // 29 days -> 00, 30 days -> 01, 31 days -> 10, 32 days -> 11
-  let binaryString = '';
   let encoded = 0;
 
 
   for (let i = 0; i < 12; i++) {
     const days = monthLengths[i];
-    let bits;
-    switch (days) {
-      case 29: bits = '00'; break;
-      case 30: bits = '01'; break;
-      case 31: bits = '10'; break;
-      case 32: bits = '11'; break;
-      default: throw new Error(`Invalid month length: ${days}`);
-    }
-    binaryString += bits;
-
     encoded |= ((days - 29) & 3) << (i * 2); // Store at the correct position
   }
 
-  // Format binary string with spaces for readability
-  const formattedBinary = `"${binaryString.match(/.{4}/g).join(' ')}"`;
-
   return {
     hex: '0x' + encoded.toString(16),
-    binaryFormat: formattedBinary
+    binaryFormat: encoded.toString(2).padStart(24, '0').match(/.{4}/g).join(' ')
   };
 }
 
@@ -200,7 +186,7 @@ function generateBikramArray() {
     const groupYears = sortedYears.slice(startIdx, endIdx + 1);
 
     // Add year range comment
-    output += `\n  //* ${groupYears[0]} -${groupYears[groupYears.length - 1]} */\n`;
+    output += `\n  //* ${groupYears[0]} - ${groupYears[groupYears.length - 1]} */\n`;
 
     // Process each year in the group
     const binaryStrings = [] as string[];
@@ -214,10 +200,11 @@ function generateBikramArray() {
     }
 
     // Add binary format comment line
-    output += `  // ${binaryStrings.join(', ')},\n`;
+    output += `  // ${binaryStrings.map(str => `"${str}"`).join(', ')},\n`;
 
     // Add hex values line with proper spacing
     output += `  ${hexValues.join(',                        ')}${endIdx < sortedYears.length - 1 ? ',' : ''}\n`;
+    // output += `// ${groupYears[0]}-${groupYears[groupYears.length - 1]}\n`;
   }
 
   // Close the array
