@@ -153,8 +153,11 @@ function encodeMonthLengths(monthLengths) {
   // For Nepali calendar, we need to encode each month using 2 bits
   // 29 days -> 00, 30 days -> 01, 31 days -> 10, 32 days -> 11
   let binaryString = '';
+  let encoded = 0;
 
-  for (const days of monthLengths) {
+
+  for (let i = 0; i < 12; i++) {
+    const days = monthLengths[i];
     let bits;
     switch (days) {
       case 29: bits = '00'; break;
@@ -164,17 +167,15 @@ function encodeMonthLengths(monthLengths) {
       default: throw new Error(`Invalid month length: ${days}`);
     }
     binaryString += bits;
-  }
 
-  // Total: 24 bits (12 months × 2 bits) = 6 hex characters
-  // Convert binary to hex
-  const hexValue = '0x' + parseInt(binaryString, 2).toString(16).padStart(6, '0');
+    encoded |= ((days - 29) & 3) << (i * 2); // Store at the correct position
+  }
 
   // Format binary string with spaces for readability
   const formattedBinary = `"${binaryString.match(/.{4}/g).join(' ')}"`;
 
   return {
-    hex: hexValue,
+    hex: '0x' + encoded.toString(16),
     binaryFormat: formattedBinary
   };
 }
