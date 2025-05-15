@@ -15,12 +15,13 @@
 
 import {AnyCalendarDate, CalendarIdentifier} from '../types';
 import {CalendarDate} from '../CalendarDate';
-import {GregorianCalendar, gregorianToJulianDay} from './GregorianCalendar';
-
-const MS_PER_DAY = 86400000;
-const VIKRAM_SAMVAT_EPOCH = -1789990200000;
+import {GregorianCalendar} from './GregorianCalendar';
 
 const VIKRAM_YEAR_ZERO = 1970;
+const NEPALI_EPOCH = 2419871; // Julian day for 1970 Baisakh 1 (first month, first day of first year in our data)
+
+let VIKRAM_YEAR_START_TABLE: Uint32Array;
+
 
 const ENCODED_MONTH_LENGTHS = [
   0x511aba, 0x5117ba, 0x9056ee, 0x8456ed, 0x511aba, 0x5119fa, 0x9056ee, 0x8456ed, 0x511aba, 0x5116fa, // 1970-1979
@@ -38,7 +39,7 @@ const ENCODED_MONTH_LENGTHS = [
   0x511aba, 0x5116fa, 0x9056ee, 0x814aea, 0x511aba, 0x5116fa, 0x9056ee, 0x514aea, 0x511aba, 0x5116fa  // 2090-2099
 ];
 
-function _getDaysInMonth(year: number, month: number) {
+function vikramMonthLength(year: number, month: number) {
   if (month < 1 || month > 12) {throw new Error('Invalid month value: ' + month);}
 
   const delta = ENCODED_MONTH_LENGTHS[year - VIKRAM_YEAR_ZERO];
@@ -55,51 +56,105 @@ function _getDaysInMonth(year: number, month: number) {
 export class NepaliCalendar extends GregorianCalendar {
   identifier = 'nepali' as CalendarIdentifier;
 
-  fromJulianDay(jd: number): CalendarDate {
-    // Gregorian date for Julian day
-    let date = super.fromJulianDay(jd);
+  constructor() {
+    super();
+    if (!VIKRAM_YEAR_START_TABLE) {
+      VIKRAM_YEAR_START_TABLE = new Uint32Array(ENCODED_MONTH_LENGTHS.length);
 
-    var m, dM, year = VIKRAM_YEAR_ZERO, days = Math.floor((Date.parse(date.toString()) - VIKRAM_SAMVAT_EPOCH) / MS_PER_DAY) + 1;
-
-    while (days > 0) {
-      for (m = 1; m <= 12; ++m) {
-        dM = _getDaysInMonth(year, m);
-        if (days <= dM) {return new CalendarDate(this, year, m, days);}
-        days -= dM;
+      let yearStart = 0;
+      for (let year = VIKRAM_YEAR_ZERO; year <= VIKRAM_YEAR_ZERO + ENCODED_MONTH_LENGTHS.length - 1; year++) {
+        VIKRAM_YEAR_START_TABLE[year - VIKRAM_YEAR_ZERO] = yearStart;
+        for (let i = 1; i <= 12; i++) {
+          yearStart += vikramMonthLength(year, i);
+        }
       }
-      ++year;
+    }
+  }
+
+  fromJulianDay(jd: number): CalendarDate {
+    const days = jd - NEPALI_EPOCH;
+
+    let yearIndex = 0;
+    let yearCount = ENCODED_MONTH_LENGTHS.length;
+
+    if (days < 0 || days >= VIKRAM_YEAR_START_TABLE![yearCount]) {
+      throw new Error('Date outside supported range: ' + jd);
     }
 
-    throw new Error('Date outside supported range: ' + jd + ' AD');
+    let low = 0;
+    let high = yearCount;
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2);
+      if (VIKRAM_YEAR_START_TABLE![mid] <= days) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+
+    yearIndex = low - 1;
+    const year = VIKRAM_YEAR_ZERO + yearIndex;
+
+    let dayOfYear = days - VIKRAM_YEAR_START_TABLE![yearIndex];
+    let month = 1;
+    let dayInMonth = dayOfYear + 1;
+
+    while (month <= 12) {
+      const daysInMonth = vikramMonthLength(year, month);
+      if (dayInMonth <= daysInMonth) {
+        break;
+      }
+      dayInMonth -= daysInMonth;
+      month++;
+    }
+
+    return new CalendarDate(this, year, month, dayInMonth);
   }
 
   toJulianDay(date: AnyCalendarDate): number {
-    if (date.year < VIKRAM_YEAR_ZERO) {throw new Error('Invalid year value: ' + date.year);}
-    if (date.day < 1 || date.day > _getDaysInMonth(date.year, date.month)) {throw new Error('Invalid day value: ' + date.day);}
+    const {year, month, day} = date;
 
-    let timestamp = VIKRAM_SAMVAT_EPOCH + (MS_PER_DAY * date.day);
-
-
-    let {year, month} = date;
-
-    month -= 1;
-
-    while (year >= VIKRAM_YEAR_ZERO) {
-      while (month > 0) {
-        timestamp += (MS_PER_DAY * _getDaysInMonth(year, month));
-        month--;
-      }
-      month = 12;
-      year--;
+    if (year < VIKRAM_YEAR_ZERO || year >= VIKRAM_YEAR_ZERO + ENCODED_MONTH_LENGTHS.length) {
+      throw new Error('Year outside supported range: ' + year);
     }
 
-    const jsdate = new Date(timestamp);
+    if (month < 1 || month > 12) {
+      throw new Error('Invalid month: ' + month);
+    }
 
-    return gregorianToJulianDay('AD', jsdate.getUTCFullYear(), jsdate.getUTCMonth() + 1, jsdate.getUTCDate());
+    if (day < 1 || day > vikramMonthLength(year, month)) {
+      throw new Error('Invalid day: ' + day);
+    }
+
+    let jd = NEPALI_EPOCH + VIKRAM_YEAR_START_TABLE![year - VIKRAM_YEAR_ZERO];
+
+    for (let m = 1; m < month; m++) {
+      jd += vikramMonthLength(year, m);
+    }
+
+    jd += day - 1;
+
+    return jd;
   }
 
   getDaysInMonth(date: AnyCalendarDate): number {
-    return _getDaysInMonth(date.year, date.month);
+    return vikramMonthLength(date.year, date.month);
+  }
+
+  getDaysInYear(date: AnyCalendarDate): number {
+    if (date.year < VIKRAM_YEAR_ZERO || date.year >= VIKRAM_YEAR_ZERO + ENCODED_MONTH_LENGTHS.length) {
+      throw new Error('Year outside supported range: ' + date.year);
+    }
+
+    if (date.year === VIKRAM_YEAR_ZERO + ENCODED_MONTH_LENGTHS.length - 1) {
+      let days = 0;
+      for (let m = 1; m <= 12; m++) {
+        days += vikramMonthLength(date.year, m);
+      }
+      return days;
+    }
+
+    return VIKRAM_YEAR_START_TABLE![date.year + 1 - VIKRAM_YEAR_ZERO] - VIKRAM_YEAR_START_TABLE![date.year - VIKRAM_YEAR_ZERO];
   }
 
   getYearsInEra(): number {
