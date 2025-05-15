@@ -17,32 +17,18 @@ import {AnyCalendarDate, CalendarIdentifier} from '../types';
 import {CalendarDate} from '../CalendarDate';
 import {GregorianCalendar} from './GregorianCalendar';
 
-const VIKRAM_YEAR_ZERO = 1970;
 const NEPALI_EPOCH = 2419871; // Julian day for 1970 Baisakh 1 (first month, first day of first year in our data)
+const VIKRAM_YEAR_ZERO = 1970;
+
+const VIKRAM_MONTH_DATA = 'uhpRALoXUQDuVpAA7VaEALoaUQD6GVEA7laQAO1WhAC6GlEA+hZRAO5WkADqSlEAuhpRAPoWUQDuVpAA6kpRALoaUQDuFlEA7laQAOoaUQC6GlEA7hZRAO5WhADqGlEAuhpRAO5WUADuVoQAuhpRALoaUQDuVpAA7VaEALoaUQD6FlEA7laQAO1WhAC6GlEA+hZRAO5WkADqSoEAuhpRAPoWUQDuVpAA6kpRALoaUQD6FlEA7laQAOpKUQC6GlEA7hZRAO5WhADqGlEAuhpRAO5WUADuVoQA6hpRALoaUQDuVpAA7VaEALoaUQC6F1EA7laQAO1WhAC6GlEA+hZRAO5WkADtSoEAuhpRAPoWUQDuVpAA6kpRALoaUQD6FlEA7laQAOpKUQC6GlEA7hZRAO5WkADqGlEAuhpRAO5WUADuVoQA6hpRALoaUQDuVlAA7laEALoaUQC6F1EA7laQAO1WhAC6GlEA+hZRAO5WkADtSoQAuhpRAPoWUQDuVpAA6kqBALoaUQD6FlEA7laQAOpKUQC6GlEA7hZRAO5WkADqGlEAuhpRAO5WUADuVoQA6hpRALoaUQDuVlAA7laEALoaUQC6GlEA7laQAO1WhAC6GlEA+hZRAO5WkADtVoQAuhpRAPoWUQDuVpAA6kqBALoaUQD6FlEA7laQAOpKUQC6GlEA+hZRAA==';
 
 let VIKRAM_YEAR_START_TABLE: Uint32Array;
-
-
-const ENCODED_MONTH_LENGTHS = [
-  0x511aba, 0x5117ba, 0x9056ee, 0x8456ed, 0x511aba, 0x5119fa, 0x9056ee, 0x8456ed, 0x511aba, 0x5116fa, // 1970-1979
-  0x9056ee, 0x514aea, 0x511aba, 0x5116fa, 0x9056ee, 0x514aea, 0x511aba, 0x5116ee, 0x9056ee, 0x511aea, // 1980-1989
-  0x511aba, 0x5116ee, 0x8456ee, 0x511aea, 0x511aba, 0x5056ee, 0x8456ee, 0x511aba, 0x511aba, 0x9056ee, // 1990-1999
-  0x8456ed, 0x511aba, 0x5116fa, 0x9056ee, 0x8456ed, 0x511aba, 0x5116fa, 0x9056ee, 0x814aea, 0x511aba, // 2000-2009
-  0x5116fa, 0x9056ee, 0x514aea, 0x511aba, 0x5116fa, 0x9056ee, 0x514aea, 0x511aba, 0x5116ee, 0x8456ee, // 2010-2019
-  0x511aea, 0x511aba, 0x5056ee, 0x8456ee, 0x511aea, 0x511aba, 0x9056ee, 0x8456ed, 0x511aba, 0x5117ba, // 2020-2029
-  0x9056ee, 0x8456ed, 0x511aba, 0x5116fa, 0x9056ee, 0x814aed, 0x511aba, 0x5116fa, 0x9056ee, 0x514aea, // 2030-2039
-  0x511aba, 0x5116fa, 0x9056ee, 0x514aea, 0x511aba, 0x5116ee, 0x9056ee, 0x511aea, 0x511aba, 0x5056ee, // 2040-2049
-  0x8456ee, 0x511aea, 0x511aba, 0x5056ee, 0x8456ee, 0x511aba, 0x5117ba, 0x9056ee, 0x8456ed, 0x511aba, // 2050-2059
-  0x5116fa, 0x9056ee, 0x844aed, 0x511aba, 0x5116fa, 0x9056ee, 0x814aea, 0x511aba, 0x5116fa, 0x9056ee, // 2060-2069
-  0x514aea, 0x511aba, 0x5116ee, 0x9056ee, 0x511aea, 0x511aba, 0x5056ee, 0x8456ee, 0x511aea, 0x511aba, // 2070-2079
-  0x5056ee, 0x8456ee, 0x511aba, 0x511aba, 0x9056ee, 0x8456ed, 0x511aba, 0x5116fa, 0x9056ee, 0x8456ed, // 2080-2089
-  0x511aba, 0x5116fa, 0x9056ee, 0x814aea, 0x511aba, 0x5116fa, 0x9056ee, 0x514aea, 0x511aba, 0x5116fa  // 2090-2099
-];
+let VIKRAM_MONTHLENGTH: Uint32Array;
 
 function vikramMonthLength(year: number, month: number) {
   if (month < 1 || month > 12) {throw new Error('Invalid month value: ' + month);}
 
-  const delta = ENCODED_MONTH_LENGTHS[year - VIKRAM_YEAR_ZERO];
+  const delta = VIKRAM_MONTHLENGTH[year - VIKRAM_YEAR_ZERO];
   if (typeof delta === 'undefined') {throw new Error('No data for year: ' + year + ' BS');}
 
   return 29 + ((delta >>> (((month - 1) << 1))) & 3);
@@ -58,11 +44,17 @@ export class NepaliCalendar extends GregorianCalendar {
 
   constructor() {
     super();
+    if (!VIKRAM_MONTHLENGTH) {
+      VIKRAM_MONTHLENGTH = new Uint32Array(Uint8Array.from(atob(VIKRAM_MONTH_DATA), c => c.charCodeAt(0)).buffer);
+    }
+
+    console.log(VIKRAM_MONTHLENGTH.length);
+
     if (!VIKRAM_YEAR_START_TABLE) {
-      VIKRAM_YEAR_START_TABLE = new Uint32Array(ENCODED_MONTH_LENGTHS.length);
+      VIKRAM_YEAR_START_TABLE = new Uint32Array(VIKRAM_MONTHLENGTH.length);
 
       let yearStart = 0;
-      for (let year = VIKRAM_YEAR_ZERO; year <= VIKRAM_YEAR_ZERO + ENCODED_MONTH_LENGTHS.length - 1; year++) {
+      for (let year = VIKRAM_YEAR_ZERO; year <= VIKRAM_YEAR_ZERO + VIKRAM_MONTHLENGTH.length - 1; year++) {
         VIKRAM_YEAR_START_TABLE[year - VIKRAM_YEAR_ZERO] = yearStart;
         for (let i = 1; i <= 12; i++) {
           yearStart += vikramMonthLength(year, i);
@@ -75,7 +67,7 @@ export class NepaliCalendar extends GregorianCalendar {
     const days = jd - NEPALI_EPOCH;
 
     let yearIndex = 0;
-    let yearCount = ENCODED_MONTH_LENGTHS.length;
+    let yearCount = VIKRAM_MONTHLENGTH.length;
 
     if (days < 0 || days >= VIKRAM_YEAR_START_TABLE![yearCount]) {
       throw new Error('Date outside supported range: ' + jd);
@@ -114,7 +106,7 @@ export class NepaliCalendar extends GregorianCalendar {
   toJulianDay(date: AnyCalendarDate): number {
     const {year, month, day} = date;
 
-    if (year < VIKRAM_YEAR_ZERO || year >= VIKRAM_YEAR_ZERO + ENCODED_MONTH_LENGTHS.length) {
+    if (year < VIKRAM_YEAR_ZERO || year >= VIKRAM_YEAR_ZERO + VIKRAM_MONTHLENGTH.length) {
       throw new Error('Year outside supported range: ' + year);
     }
 
@@ -142,11 +134,11 @@ export class NepaliCalendar extends GregorianCalendar {
   }
 
   getDaysInYear(date: AnyCalendarDate): number {
-    if (date.year < VIKRAM_YEAR_ZERO || date.year >= VIKRAM_YEAR_ZERO + ENCODED_MONTH_LENGTHS.length) {
+    if (date.year < VIKRAM_YEAR_ZERO || date.year >= VIKRAM_YEAR_ZERO + VIKRAM_MONTHLENGTH.length) {
       throw new Error('Year outside supported range: ' + date.year);
     }
 
-    if (date.year === VIKRAM_YEAR_ZERO + ENCODED_MONTH_LENGTHS.length - 1) {
+    if (date.year === VIKRAM_YEAR_ZERO + VIKRAM_MONTHLENGTH.length - 1) {
       let days = 0;
       for (let m = 1; m <= 12; m++) {
         days += vikramMonthLength(date.year, m);
@@ -158,7 +150,7 @@ export class NepaliCalendar extends GregorianCalendar {
   }
 
   getYearsInEra(): number {
-    return VIKRAM_YEAR_ZERO + ENCODED_MONTH_LENGTHS.length - 1;
+    return VIKRAM_YEAR_ZERO + VIKRAM_MONTHLENGTH.length - 1;
   }
 
   getEras(): string[] {

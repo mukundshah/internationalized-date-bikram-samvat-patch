@@ -161,8 +161,8 @@ function encodeMonthLengths(monthLengths) {
   }
 
   return {
-    hex: '0x' + encoded.toString(16),
-    binaryFormat: encoded.toString(2).padStart(24, '0').match(/.{4}/g).join(' ')
+    hex: '0x' + encoded.toString(16).padStart(8, '0'),
+    binaryFormat: encoded.toString(2).padStart(32, '0').match(/.{4}/g).join(' ')
   };
 }
 
@@ -171,15 +171,14 @@ function encodeMonthLengths(monthLengths) {
  */
 function generateBikramArray() {
   // Sort years for consistent output
-  const sortedYears = Object.keys(yearMonthData).map(Number).sort();
+  const sortedYears = Object.keys(MONTH_DATA).map(Number).sort();
 
   // Process years in groups (typically 5 years per group)
   const YEARS_PER_GROUP = 5;
   let output = '// This is a generated file. Do not edit.\n';
   output += '// It is used to store the month lengths for the Nepali calendar.\n';
   output += '\n';
-  output += 'const BIKRAM_SABMAT_MONTHLENGTH = [';
-
+  output += 'const BIKRAM_SABMAT_MONTH_DATA = [';
 
   for (let startIdx = 0; startIdx < sortedYears.length; startIdx += YEARS_PER_GROUP) {
     const endIdx = Math.min(startIdx + YEARS_PER_GROUP - 1, sortedYears.length - 1);
@@ -193,7 +192,7 @@ function generateBikramArray() {
     const hexValues = [] as string[];
 
     for (const year of groupYears) {
-      const monthLengths = yearMonthData[year];
+      const monthLengths = MONTH_DATA[year];
       const { hex, binaryFormat } = encodeMonthLengths(monthLengths);
       binaryStrings.push(binaryFormat);
       hexValues.push(hex);
@@ -209,7 +208,8 @@ function generateBikramArray() {
 
   // Close the array
   output += '];\n\n';
-  output += 'console.log(Buffer.from(new Uint16Array(BIKRAM_SABMAT_MONTHLENGTH).buffer).toString(\'base64\'));\n';
+
+  output += 'console.log(Buffer.from(new Uint32Array(BIKRAM_SABMAT_MONTH_DATA).buffer).toString(\'base64\'));\n';
 
   return output;
 }
