@@ -48,8 +48,6 @@ export class NepaliCalendar extends GregorianCalendar {
       VIKRAM_MONTHLENGTH = new Uint32Array(Uint8Array.from(atob(VIKRAM_MONTH_DATA), c => c.charCodeAt(0)).buffer);
     }
 
-    console.log(VIKRAM_MONTHLENGTH.length);
-
     if (!VIKRAM_YEAR_START_TABLE) {
       VIKRAM_YEAR_START_TABLE = new Uint32Array(VIKRAM_MONTHLENGTH.length);
 
