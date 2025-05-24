@@ -1,6 +1,6 @@
 {
   "package": "@internationalized/date",
-  "upstreamVersion": "3.8.0",
+  "upstreamVersion": "3.8.1",
   "patchVersion": "1.1.4",
   "features": [
     "nepali-calendar-support"
