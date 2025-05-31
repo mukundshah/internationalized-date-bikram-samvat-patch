@@ -136,7 +136,9 @@ function getCachedDateFormatter(locale: string, options: Intl.DateTimeFormatOpti
     return formatterCache.get(cacheKey)!;
   }
 
-  if (options.calendar === 'nepali') {
+  const calendar = options.calendar || locale.match(/-u(?:-[a-z0-9]{2,8})*-ca-([a-z0-9]+)/i)?.[1];
+
+  if (calendar === 'nepali') {
     let nepaliFormatter = new NepaliDateTimeFormat(locale, options);
     formatterCache.set(cacheKey, nepaliFormatter);
     return nepaliFormatter;
