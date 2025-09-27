@@ -23,12 +23,10 @@ export class DateFormatter implements Intl.DateTimeFormat {
   private formatter: Intl.DateTimeFormat;
   private options: Intl.DateTimeFormatOptions;
   private resolvedHourCycle: Intl.DateTimeFormatOptions['hourCycle'];
-  private resolvedCalendar: Intl.DateTimeFormatOptions['calendar'];
 
   constructor(locale: string, options: Intl.DateTimeFormatOptions = {}) {
     this.formatter = getCachedDateFormatter(locale, options);
     this.options = options;
-    this.resolvedCalendar = options.calendar;
   }
 
   /** Formats a date as a string according to the locale and format options passed to the constructor. */

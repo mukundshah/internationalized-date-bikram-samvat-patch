@@ -40,7 +40,7 @@ function vikramMonthLength(year: number, month: number) {
  * in North India. Only one era identifier is supported: 'vikram'.
  */
 export class NepaliCalendar extends GregorianCalendar {
-  identifier = 'nepali' as CalendarIdentifier;
+  identifier: CalendarIdentifier = 'nepali';
 
   constructor() {
     super();
