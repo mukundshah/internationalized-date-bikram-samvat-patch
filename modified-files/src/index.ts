@@ -64,6 +64,8 @@ export {
   today,
   getHoursInDay,
   getLocalTimeZone,
+  setLocalTimeZone,
+  resetLocalTimeZone,
   startOfMonth,
   startOfWeek,
   startOfYear,
