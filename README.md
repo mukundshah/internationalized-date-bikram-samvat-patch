@@ -17,6 +17,10 @@ A patch that adds Bikram Sambat (Nepali calendar) support to the [`@internationa
 | 3.8.1           | 1.2.0        | ✅ Supported |
 | 3.8.0           | 1.1.4        | ✅ Supported |
 
+## Supported Date Range
+
+Month-length data is bundled for **BS 1970 – 2099**, roughly **1913-04-13 – 2043-04-13 AD**. Dates outside this range are not supported. The source data lives in [`scripts/generate-bikramsambat-monthlength.ts`](scripts/generate-bikramsambat-monthlength.ts#L10-L141).
+
 ## Quick Start
 
 1. **Choose your patch**: Select the appropriate patch file from the `patches/` directory based on your `@internationalized/date` version (see compatibility table below).
