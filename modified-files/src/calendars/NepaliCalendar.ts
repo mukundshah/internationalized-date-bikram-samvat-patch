@@ -155,5 +155,9 @@ export class NepaliCalendar extends GregorianCalendar {
     return ['BS'];
   }
 
+  getMaximumDaysInMonth(): number {
+    return 32;
+  }
+
   balanceDate(): void {}
 }
