@@ -49,6 +49,7 @@ export {
   toTimeZone,
   toLocalTimeZone,
   fromDate,
+  fromDateToLocal,
   fromAbsolute
 } from './conversion';
 export {
