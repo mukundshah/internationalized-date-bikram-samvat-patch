@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2](./patches/@internationalized__date@3.12.2__1.6.2.patch) (2026-05-28)
+
+### Chore
+
+- Update `@internationalized/date` to version 3.12.2
+
 ## [1.6.1](./patches/@internationalized__date@3.12.1__1.6.1.patch) (2026-04-14)
 
 ### Chore
