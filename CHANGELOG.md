@@ -59,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Restore `setLocalTimeZone` and `resetLocalTimeZone` exports that were missing from the patched `index.ts`
 
-## [1.3.0](./patches/@internationalized__date@3.8.2__1.2.1.patch) (2025-09-27)
+## [1.3.0](./patches/@internationalized__date@3.9.0__1.3.0.patch) (2025-09-27)
 
 ### Chore
 

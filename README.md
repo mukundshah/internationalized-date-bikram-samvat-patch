@@ -12,7 +12,15 @@ A patch that adds Bikram Sambat (Nepali calendar) support to the [`@internationa
 
 | Package Version | Latest Patch | Status |
 |-----------------|--------------|--------|
-| 3.9.0           | 1.3.0        | ✅ Latest |
+| 3.12.4          | 1.6.4        | ✅ Latest |
+| 3.12.3          | 1.6.3        | ✅ Supported |
+| 3.12.2          | 1.6.2        | ✅ Supported |
+| 3.12.1          | 1.6.1        | ✅ Supported |
+| 3.12.0          | 1.6.0        | ✅ Supported |
+| 3.11.0          | 1.5.0        | ✅ Supported |
+| 3.10.1          | 1.4.1        | ✅ Supported |
+| 3.10.0          | 1.4.0        | ✅ Supported |
+| 3.9.0           | 1.3.1        | ✅ Supported |
 | 3.8.2           | 1.2.1        | ✅ Supported |
 | 3.8.1           | 1.2.0        | ✅ Supported |
 | 3.8.0           | 1.1.4        | ✅ Supported |
@@ -31,7 +39,7 @@ Month-length data is bundled for **BS 1970 – 2099**, roughly **1913-04-13 – 
    {
      "pnpm": {
        "patchedDependencies": {
-         "@internationalized/date": "patches/@internationalized__date@3.9.0__1.3.0.patch"
+         "@internationalized/date": "patches/@internationalized__date@3.12.4__1.6.4.patch"
        }
      }
    }
